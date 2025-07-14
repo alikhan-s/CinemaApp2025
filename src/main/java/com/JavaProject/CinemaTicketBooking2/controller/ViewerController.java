@@ -1,7 +1,7 @@
 package com.JavaProject.CinemaTicketBooking2.controller;
 
+import com.JavaProject.CinemaTicketBooking2.dao.ViewerDAO;
 import com.JavaProject.CinemaTicketBooking2.model.Viewer;
-import com.JavaProject.CinemaTicketBooking2.repository.ViewerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,40 +12,36 @@ import java.util.List;
 public class ViewerController {
 
     @Autowired
-    private ViewerRepository viewerRepository;
+    private ViewerDAO viewerDAO;
 
     @GetMapping
     public List<Viewer> getAllViewers() {
-        return viewerRepository.findAll();
+        return viewerDAO.findAll();
     }
 
     @PostMapping
-    public Viewer createViewer(@RequestBody Viewer viewer) {
-        return viewerRepository.save(viewer);
+    public void createViewer(@RequestBody Viewer viewer) {
+        viewerDAO.save(viewer);
     }
 
     @GetMapping("/{id}")
     public Viewer getViewerById(@PathVariable Long id) {
-        return viewerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Viewer not found with id: " + id));
+        Viewer viewer = viewerDAO.findById(id);
+        if (viewer == null) {
+            throw new RuntimeException("Viewer not found with id: " + id);
+        }
+        return viewer;
     }
 
     @PutMapping("/{id}")
-    public Viewer updateViewer(@PathVariable Long id, @RequestBody Viewer viewerDetails) {
-        Viewer viewer = viewerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Viewer not found with id: " + id));
-
-        viewer.setName(viewerDetails.getName());
-        viewer.setAge(viewerDetails.getAge());
-        return viewerRepository.save(viewer);
+    public void updateViewer(@PathVariable Long id, @RequestBody Viewer viewer) {
+        viewer.setId(id);
+        viewerDAO.update(viewer);
     }
 
     @DeleteMapping("/{id}")
     public String deleteViewer(@PathVariable Long id) {
-        Viewer viewer = viewerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Viewer not found with id: " + id));
-
-        viewerRepository.delete(viewer);
+        viewerDAO.delete(id);
         return "Viewer deleted successfully with id: " + id;
     }
 }

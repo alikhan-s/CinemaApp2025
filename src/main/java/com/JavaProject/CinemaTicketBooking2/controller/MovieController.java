@@ -1,53 +1,43 @@
 package com.JavaProject.CinemaTicketBooking2.controller;
 
+import com.JavaProject.CinemaTicketBooking2.dao.MovieDAO;
 import com.JavaProject.CinemaTicketBooking2.model.Movie;
-import com.JavaProject.CinemaTicketBooking2.repository.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/movies")
 public class MovieController {
 
     @Autowired
-    private MovieRepository movieRepository;
+    private MovieDAO movieDAO;
 
     @GetMapping
     public List<Movie> getAllMovies() {
-        return movieRepository.findAll();
-    }
-
-    @PostMapping
-    public Movie createMovie(@RequestBody Movie movie) {
-        return movieRepository.save(movie);
+        return movieDAO.findAll();
     }
 
     @GetMapping("/{id}")
     public Movie getMovieById(@PathVariable Long id) {
-        return movieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Movie not found with id: " + id));
+        return movieDAO.findById(id);
+    }
+
+    @PostMapping
+    public void addMovie(@RequestBody Movie movie) {
+        movieDAO.save(movie);
     }
 
     @PutMapping("/{id}")
-    public Movie updateMovie(@PathVariable Long id, @RequestBody Movie movieDetails) {
-        Movie movie = movieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Movie not found with id: " + id));
-
-        movie.setName(movieDetails.getName());
-        movie.setGenre(movieDetails.getGenre());
-        movie.setDuration(movieDetails.getDuration());
-        movie.setAgeLimit(movieDetails.getAgeLimit());
-        return movieRepository.save(movie);
+    public void updateMovie(@PathVariable Long id, @RequestBody Movie movie) {
+        movie.setId(id);
+        movieDAO.update(movie);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteMovie(@PathVariable Long id) {
-        Movie movie = movieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Movie not found with id: " + id));
-
-        movieRepository.delete(movie);
-        return "Movie deleted successfully with id: " + id;
+    public void deleteMovie(@PathVariable Long id) {
+        movieDAO.delete(id);
     }
 }
+

@@ -1,7 +1,7 @@
 package com.JavaProject.CinemaTicketBooking2.controller;
 
+import com.JavaProject.CinemaTicketBooking2.dao.CinemaDAO;
 import com.JavaProject.CinemaTicketBooking2.model.Cinema;
-import com.JavaProject.CinemaTicketBooking2.repository.CinemaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,40 +12,36 @@ import java.util.List;
 public class CinemaController {
 
     @Autowired
-    private CinemaRepository cinemaRepository;
+    private CinemaDAO cinemaDAO;
 
     @GetMapping
     public List<Cinema> getAllCinemas() {
-        return cinemaRepository.findAll();
+        return cinemaDAO.findAll();
     }
 
     @PostMapping
-    public Cinema createCinema(@RequestBody Cinema cinema) {
-        return cinemaRepository.save(cinema);
+    public void createCinema(@RequestBody Cinema cinema) {
+        cinemaDAO.save(cinema);
     }
 
     @GetMapping("/{id}")
     public Cinema getCinemaById(@PathVariable Long id) {
-        return cinemaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cinema not found with id: " + id));
+        Cinema cinema = cinemaDAO.findById(id);
+        if (cinema == null) {
+            throw new RuntimeException("Cinema not found with id: " + id);
+        }
+        return cinema;
     }
 
     @PutMapping("/{id}")
-    public Cinema updateCinema(@PathVariable Long id, @RequestBody Cinema cinemaDetails) {
-        Cinema cinema = cinemaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cinema not found with id: " + id));
-
-        cinema.setName(cinemaDetails.getName());
-        cinema.setLocation(cinemaDetails.getLocation());
-        return cinemaRepository.save(cinema);
+    public void updateCinema(@PathVariable Long id, @RequestBody Cinema cinemaDetails) {
+        cinemaDetails.setId(id);
+        cinemaDAO.update(cinemaDetails);
     }
 
     @DeleteMapping("/{id}")
     public String deleteCinema(@PathVariable Long id) {
-        Cinema cinema = cinemaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cinema not found with id: " + id));
-
-        cinemaRepository.delete(cinema);
+        cinemaDAO.delete(id);
         return "Cinema deleted successfully with id: " + id;
     }
 }
